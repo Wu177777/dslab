@@ -72,6 +72,7 @@ func DoMapTask(mapf func(string, string) []KeyValue, response *Task) {
 	HashedKV := make([][]KeyValue, rn)
 
 	for _, kv := range intermediate {
+		// fmt.Println(kv, " ", ihash(kv.Key)%rn, kv.Key, kv.Value)
 		HashedKV[ihash(kv.Key)%rn] = append(HashedKV[ihash(kv.Key)%rn], kv)
 	}
 	for i := 0; i < rn; i++ {
@@ -110,6 +111,7 @@ func shuffle(files []string) []KeyValue {
 func DoReduceTask(reducef func(string, []string) string, response *Task) {
 	reduceFileNum := response.TaskId
 	intermediate := shuffle(response.FileSlice)
+	// fmt.Println(response.FileSlice, "pt")
 	dir, _ := os.Getwd()
 
 	tempFile, err := ioutil.TempFile(dir, "mr-tmp-*")
@@ -127,7 +129,9 @@ func DoReduceTask(reducef func(string, []string) string, response *Task) {
 		for k := i; k < j; k++ {
 			values = append(values, intermediate[k].Value)
 		}
+		// fmt.Println("reducef", intermediate[i].Key, intermediate[i].Value, values)
 		output := reducef(intermediate[i].Key, values)
+		// fmt.Println("output", output, len(values))
 		fmt.Fprintf(tempFile, "%v %v\n", intermediate[i].Key, output)
 		i = j
 	}
